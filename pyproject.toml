@@ -1,0 +1,17 @@
+[project]
+name = "cipher-toolkit"
+version = "0.1.0"
+description = "A cli interface for interacting with a bunch of ciphers"
+readme = "README.md"
+authors = [
+    { name = "Jordan Dooley", email = "jordan.dooley@mines.sdsmt.edu" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+cipher-toolkit = "cipher_toolkit:main"
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
