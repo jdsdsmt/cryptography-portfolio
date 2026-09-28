@@ -10,13 +10,18 @@ ciphers are available. To add a new cipher:
 
 from __future__ import annotations
 
-from . import affine, caesar
+from . import affine, caesar, diophantine, vigenere
 from .ciphers import registry
 
 
 def register_all() -> None:
     """Register every built-in cipher. Idempotent: safe to call repeatedly."""
-    for cipher in (caesar.caesar, affine.affine):
+    for cipher in (
+        caesar.caesar,
+        affine.affine,
+        diophantine.diophantine,
+        vigenere.vigenere,
+    ):
         if not registry.has(cipher.name):
             registry.register(cipher)
 

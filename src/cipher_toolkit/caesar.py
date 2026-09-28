@@ -1,19 +1,14 @@
-"""Caesar cipher — the classic shift cipher.
+"""
+Caesar cipher.
 
 Each letter is shifted by a fixed amount (``key``) within the alphabet. The
-same shift applied in reverse recovers the plaintext. Cracking exploits the fact
-that a Caesar key is a pure shift, so every possible plaintext is just the
-ciphertext rotated by some amount; each of the 26 rotations is scored against
-the reference English letter distribution (see ``frequency``) and the best
-match is returned. A single letter or fewer is not enough to compare
-distributions, so every shift is shown in that case.
+same shift in reverse recovers the plaintext.
 
-Example
--------
->>> caesar.Caesarcipher().encrypt("HELLO", caesar.Config(key=3))
-'KHOOR'
->>> caesar.Caesarcipher().decrypt("KHOOR", caesar.Config(key=3))
-'HELLO'
+Cracking works because a Caesar key is just a shift, so every possible
+plaintext is the ciphertext rotated by some amount. We score each of the 26
+rotations against the normal English letter frequencies and return the best
+match. With one letter or fewer we can't compare distributions, so every shift
+is shown instead.
 """
 
 from __future__ import annotations
@@ -29,10 +24,10 @@ ALPHA_LEN = len(ALPHABET)
 
 
 class Config(CipherConfigImpl):
-    """Caesar cipher parameters.
+    """
+    Caesar cipher parameters.
 
     Attributes
-    ----------
     key: int
         The shift amount (0-25). Negative and out-of-range values are
         normalized into that range.
@@ -47,7 +42,7 @@ class Config(CipherConfigImpl):
 
 
 class CaesarCipher(Cipher):
-    """Caesar (shift) cipher implementation."""
+    """Caesar cipher implementation."""
 
     name = "Caesar"
     description = "Shift each letter by a fixed amount within the alphabet."
@@ -76,29 +71,27 @@ class CaesarCipher(Cipher):
         return True
 
     def crack(self, ciphertext: str) -> Sequence[tuple[str, CipherConfig]]:
-        # A Caesar key is a pure shift, so every plaintext is the ciphertext
+        # A Caesar key is a shift, so every plaintext is the ciphertext
         # rotated by some amount. Score each rotation against the reference
         # English letter distribution and return the best match. A single letter
         # or fewer is not enough to compare distributions, so show all shifts in
         # that case.
         counts = Counter(c for c in ciphertext.upper() if c in ALPHABET)
         if len(counts) < 2:
-            return [(self._shift(ciphertext, -s), Config(key=s)) for s in range(ALPHA_LEN)]
+            return [
+                (self._shift(ciphertext, -s), Config(key=s)) for s in range(ALPHA_LEN)
+            ]
         best_shift = _shift_scores(counts)
         return [(self._shift(ciphertext, -best_shift), Config(key=best_shift))]
 
 
-def _shift_scores(counts: Counter[str]) -> list[int]:
+def _shift_scores(counts: Counter[str]) -> int:
     """
-    Return the Caesar ``shift`` whose rotation best fits English.
+    Return the Caesar ``shift`` whose rotation best matches English.
 
-    A candidate key ``shift`` decrypts ciphertext letter at index ``j`` to the
-    plaintext index ``(j - shift) mod 26``; equivalently, the plaintext letter at
-    index ``i`` (which ``ELF_FREQUENCIES[i]`` describes) comes from the
-    ciphertext letter at index ``(i + shift) mod 26``. The score is the summed
-    squared difference between those observed ciphertext percentages and the
-    reference English distribution, so the rotation whose distribution best
-    matches English comes out first.
+    We compare the letter distribution of each rotated plaintext against the
+    normal English frequencies and pick the shift that gives the smallest
+    difference. The best match is the rotation closest to real English.
     """
     observed = [counts.get(letter, 0) for letter in ALPHABET]
     expected = [ELF_FREQUENCIES[letter] for letter in ALPHABET]
@@ -111,5 +104,5 @@ def _shift_scores(counts: Counter[str]) -> list[int]:
     )
 
 
-# The canonical instance the registry imports.
+# The instance the registry imports.
 caesar = CaesarCipher()

@@ -1,12 +1,7 @@
-"""cipher-toolkit: an extensible system for encrypting, decrypting, and cracking ciphers.
+"""A toolkit for encrypting, decrypting, and cracking classic ciphers.
 
-Adding a cipher is a two-step process:
-
-1. Create ``src/cipher_toolkit/<name>.py`` implementing the ``Cipher`` protocol.
-2. Import it and register it in ``cipher_toolkit.register``.
-
-The CLI (``cipher_toolkit.cli``) discovers every registered cipher, so new
-ciphers appear automatically with no other changes.
+It's a bunch of cipher modules that each follow the same basic interface,
+plus a CLI to interact with them.
 """
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 """
-Affine cipher — encrypts each letter as ``(ax + b) mod 26``.
+Affine cipher encrypts each letter as ``(ax + b) mod 26``.
 
 The alphabet is mapped with a multiplicative key ``a`` and an additive key ``b``.
 ``a`` must be coprime with 26 for the cipher to be invertible. Cracking solves
@@ -28,7 +28,7 @@ A = ALPHABET.index("A")
 O = ALPHABET.index("O")
 
 
-# Multipliers coprime with 26 (the only ones that give invertible mappings).
+# Multipliers coprime with 26
 CO_PRIMES = [a for a in range(1, ALPHA_LEN) if gcd(a, ALPHA_LEN) == 1]
 
 
@@ -114,23 +114,20 @@ class AffineCipher(Cipher):
 
     def _frequency_attack(self, ciphertext: str) -> list[CipherConfig]:
         # Recover candidate keys from a frequency analysis. Take the three most
-        # common ciphertext letters (ignoring non-alphabet ones) and try mapping
-        # them onto the three most common English letters. Each mapping gives a
-        # 2x2 system of encrypting equations. Solving naively means dividing by
-        # the plaintext gap, but that gap can be non-invertible mod 26 (as it is
-        # between E and A), so instead iterate the co-prime values of ``a``,
-        # derive ``b`` from the first equation, and keep the candidate only when
-        # it also satisfies the other two equations. We require three
-        # equations rather than two so spurious mappings that satisfy one pair
+        # common ciphertext letters and try mapping them onto the three most common English letters.
+        # Each mapping gives a 2x2 system of encrypting equations. Solving naively means dividing by
+        # the plaintext gap, but that gap can be non-invertible mod 26 so instead
+        # iterate the co-prime values of ``a`` and ``b`` from the first equation
+        # and keep the candidate only when it also satisfies the other two equations.
+        # We require three equations rather than two so other mappings that satisfy one pair
         # but not a third are weeded out.
         alpha = [c.upper() for c in ciphertext if c.upper() in ALPHABET]
         letters = [c for c, _ in Counter(alpha).most_common(3)]
         if len(letters) < 3:
             return []
-        # Ciphertext indices of the three most common letters (these are the y
-        # values in the encrypting equation y = a*x + b mod 26).
+        # Ciphertext indices of the three most common letters
         cy = [ALPHABET.index(c) for c in letters]
-        # The three most common English letters, tried as target-letter
+        # The most common English letters, tried as target-letter
         # triples. These are the plaintext x values. The attack succeeds as
         # long as the ciphertext's most frequent letters match some ordering
         # of these.
@@ -141,7 +138,9 @@ class AffineCipher(Cipher):
                 continue  # need three distinct target letters
             for a in CO_PRIMES:
                 b = (cy[0] - a * x1) % ALPHA_LEN
-                if (a * x2 + b) % ALPHA_LEN == cy[1] and (a * x3 + b) % ALPHA_LEN == cy[2]:
+                if (a * x2 + b) % ALPHA_LEN == cy[1] and (a * x3 + b) % ALPHA_LEN == cy[
+                    2
+                ]:
                     candidate = Config(a=a, b=b)
                     if candidate not in candidates:
                         candidates.append(candidate)

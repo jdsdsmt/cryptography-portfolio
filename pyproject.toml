@@ -7,7 +7,9 @@ authors = [
     { name = "Jordan Dooley", email = "jordan.dooley@mines.sdsmt.edu" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "numpy>=2.5.3",
+]
 
 [project.scripts]
 cipher-toolkit = "cipher_toolkit:main"

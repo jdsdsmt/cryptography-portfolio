@@ -1,27 +1,19 @@
 """
 Frequency analysis of a text.
 
-This module is not a cipher. It is a utility that turns a string of text into
-a table of how often each character appears.
+This module is not a cipher. It just turns a string of text into a table of
+how often each character appears.
 
-Theory
-Letter frequencies are a statistical fingerprint of a language. In English the
-letter ``e`` is by far the most common, followed by ``t``, ``a``, ``o``, ``i``,
-``n``, and ``s``. Their exact proportions vary with the text, but the overall
-ranking is stable enough that a ciphertext whose letter counts line up with the
-expected ranking is a strong hint that it hides English rather than random noise.
-
-To read a frequency table you first fold everything to one case so that ``A``
-and ``a`` are counted together, then count every character and divide by the
-total number of characters. The result is the fraction of the text that each
-character makes up.
-
+English letters aren't spread out evenly: ``e`` is way more common than
+``z``, and the ranking of the common letters is pretty stable. So if a
+ciphertext's letter counts look like normal English, it's probably encrypted
+English and not just random noise. You get the fractions by folding to one
+case, counting every character, and dividing by the total.
 """
 
 from collections import Counter
 
 __all__ = ["ELF_FREQUENCIES", "analyze_frequency"]
-
 # English letter frequencies, the reference distribution a ciphertext is
 # compared against when cracking. Keys are upper-case letters ordered from
 # most to least frequent; values are the percentage of the text each letter
@@ -56,20 +48,21 @@ ELF_FREQUENCIES: dict[str, float] = {
     "Z": 0.07,
 }
 
+# The same frequencies as ``ELF_FREQUENCIES`` in alphabetic order (A, B, ... Z),
+# as a list for vector work such as the dot-product column scan.
+ELF_FREQUENCIES_LIST: list[float] = [
+    ELF_FREQUENCIES[letter] for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+]
+
 
 def analyze_frequency(text: str) -> dict[str, float]:
     """
     Return how often each character appears in ``text`` as a fraction of the
     total.
 
-    The comparison is case-insensitive so ``A`` and ``a`` are tallied together.
-    Every character counts. The returned dictionary is ordered from the most frequent character
-    to the least, which is how the table is normally read when cracking a cipher.
-
-    Theory
-    Dividing a character's count by the total gives its fraction of the text.
-    That fraction is what the theory of letter frequencies predicts should
-    match the expected distribution for a language, like English's.
+    It's case-insensitive so ``A`` and ``a`` count together. The returned dict
+    is sorted from most to least frequent, which is how you read it when
+    cracking a cipher.
 
     Parameters
     text:
@@ -81,7 +74,6 @@ def analyze_frequency(text: str) -> dict[str, float]:
         the text it makes up. The dictionary is sorted with the most frequent
         character first. An empty ``text`` comes back as an empty ``dict``,
         so there is no division by zero.
-
     """
     folded = text.lower()
     if not folded:

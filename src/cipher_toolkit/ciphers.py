@@ -1,9 +1,7 @@
-"""Core cipher protocol, configuration, registry, and errors.
-
-This module defines the contract every cipher module must follow so the rest of
-the toolkit (CLI, tests, future features) can treat every cipher uniformly.
-Adding a new cipher means: write a module implementing the ``Cipher`` protocol,
-then register it in ``cipher_toolkit.ciphers.registry``.
+"""
+The pieces every cipher shares: the interface, a registry to
+hold them, and a couple of error types. Ensures all
+the individual cipher modules behave the same way.
 """
 
 from __future__ import annotations
@@ -30,13 +28,13 @@ class CrackError(CipherError):
     """Raised when a cipher cannot crack a given ciphertext."""
 
 
-@runtime_checkable
+@runtime_checkable  # Used for type checking
 class CipherConfig(Protocol):
-    """A per-operation configuration of cipher parameters.
+    """An operation configuration of cipher parameters.
 
-    Cipher-specific parameters (e.g. Caesar's shift, the Affine ``a``/``b``)
-    are passed in as a plain dict. Keeping parameters dataclass-free means a new
-    cipher never has to touch the core.
+    Cipher-specific parameters (Caesar's shift, the Affine ``a``/``b``)
+    are passed in as a plain dict. Keeping parameters here means
+    the ciphers don't need to change the dataclass.
     """
 
     def get(self, key: str, default: Any = ...) -> Any: ...
@@ -45,7 +43,7 @@ class CipherConfig(Protocol):
 
 
 class CipherConfigImpl:
-    """Reference implementation of the ``CipherConfig`` protocol backed by a dict."""
+    """Reference implementation of the ``CipherConfig`` backed by a dict."""
 
     def __init__(self, parameters: dict[str, Any] | None = None) -> None:
         self.parameters: dict[str, Any] = dict(parameters or {})
@@ -53,6 +51,7 @@ class CipherConfigImpl:
     def get(self, key: str, default: Any = None) -> Any:
         return self.parameters.get(key, default)
 
+    # Useful for dictionary-like operations
     def __getitem__(self, key: str) -> Any:
         if key not in self.parameters:
             raise KeyError(key)
@@ -61,11 +60,12 @@ class CipherConfigImpl:
     def __contains__(self, key: str) -> bool:
         return key in self.parameters
 
-    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+    # Good debugging
+    def __repr__(self) -> str:
         return f"CipherConfig({self.parameters!r})"
 
 
-@runtime_checkable
+@runtime_checkable  # Type checking
 class Cipher(Protocol):
     """A cipher implementing the toolkit's encrypt/decrypt/crack contract.
 
@@ -73,7 +73,7 @@ class Cipher(Protocol):
     the registry can construct them lazily.
     """
 
-    #: Human-readable name shown in menus and CLI output.
+    #: Human readable name shown in menus.
     name: str
     #: Short description shown alongside the cipher in listings.
     description: str
@@ -89,16 +89,16 @@ class Cipher(Protocol):
         return False
 
     def crack(self, ciphertext: str) -> Sequence[tuple[str, CipherConfig]]:
-        """Recover candidate plaintexts for an unknown-key ciphertext.
+        """Recover candidate plaintexts for an unknown key ciphertext.
 
         Returns a sequence of ``(plaintext, config)`` tuples, ordered from most
-        to least likely. The empty sequence means "nothing cracked".
+        to least likely. The empty sequence means nothing cracked.
         """
         raise CrackError(f"{self.name} cannot be cracked")
 
 
 class Registry:
-    """Holds every cipher module, keyed by lower-cased name and alias."""
+    """Holds every cipher module. Keyed by lowercased name and alias."""
 
     def __init__(self) -> None:
         self._ciphers: dict[str, Cipher] = {}
@@ -113,7 +113,7 @@ class Registry:
         self._aliases.setdefault(key, cipher.name)
 
     def get(self, name: str) -> Cipher:
-        """Return the cipher for ``name`` (case-insensitive)."""
+        """Return the cipher for ``name``."""
         key = name.strip().lower()
         if key not in self._ciphers:
             available = ", ".join(sorted(self._aliases.values())) or "(none)"
