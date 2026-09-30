@@ -69,13 +69,13 @@ That is it. The new cipher shows up in the CLI automatically.
 
 The core is just a thin registry and each cipher is its own module.
 
-- `cipher_toolkit/ciphers.py` — Holds the `Cipher` protocol, the `CipherConfig` protocol plus `CipherConfigImpl`, the exception hierarchy, and the `registry`.
-- `cipher_toolkit/register.py` — Imports every built-in cipher and calls `register_all()`.
-- `cipher_toolkit/cli.py` — The interactive front end.
-- `cipher_toolkit/cryptomath.py` — Modular arithmetic helpers like totients and CRT.
-- `cipher_toolkit/diophantine.py` — Solves linear Diophantine equations for the Affine crack.
-- `cipher_toolkit/frequency.py` — Frequency analysis for cracking.
-- `cipher_toolkit/{caesar,affine,vigenere}.py` — The actual ciphers.
+- `cipher_toolkit/ciphers.py`: Holds the `Cipher` protocol, the `CipherConfig` protocol plus `CipherConfigImpl`, the exception hierarchy, and the `registry`.
+- `cipher_toolkit/register.py`: Imports every built-in cipher and calls `register_all()`.
+- `cipher_toolkit/cli.py`: The interactive front end.
+- `cipher_toolkit/cryptomath.py`: Modular arithmetic helpers like totients and CRT.
+- `cipher_toolkit/diophantine.py`: Solves linear Diophantine equations for the Affine crack.
+- `cipher_toolkit/frequency.py`: Frequency analysis for cracking.
+- `cipher_toolkit/{caesar,affine,vigenere}.py`: The actual ciphers.
 
 ## Testing
 
